@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 0
+    path: Assets/alphabet1.unity
+    guid: a599bae2790300941b4d09c9315e03e1
+  - enabled: 0
+    path: Assets/alphabet2.unity
+    guid: 3d9f0b950d5604c46b82c11b47835758
+  - enabled: 0
+    path: Assets/alphabet3.unity
+    guid: 88c66711e732c6245876149c229ff7d0
+  - enabled: 0
+    path: Assets/multiple-monitors.unity
+    guid: b854d6c387b061649a70686a6ee07bfb
+  - enabled: 1
+    path: Assets/alphabet4-tryingdoublecamera.unity
+    guid: 06d58fa8826dfb14bb9543e53bacd2b4
+  m_configObjects: {}

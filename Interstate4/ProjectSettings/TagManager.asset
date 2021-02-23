@@ -1,0 +1,158 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - master
+  - letter
+  - rotations
+  - masterLetter
+  - 0_q1
+  - 0_q2
+  - slaveLetter
+  - 0_q3
+  - 0_q4
+  - 1_q1
+  - 1_q2
+  - 1_q3
+  - 1_q4
+  - 2_q1
+  - 2_q2
+  - 2_q3
+  - 2_q4
+  - 3_q1
+  - 3_q2
+  - 3_q3
+  - 3_q4
+  - 4_q1
+  - 4_q2
+  - 4_q3
+  - 4_q4
+  - 5_q1
+  - 5_q2
+  - 5_q3
+  - 5_q4
+  - 6_q1
+  - 6_q2
+  - 6_q3
+  - 6_q4
+  - 7_q1
+  - 7_q2
+  - 7_q3
+  - 7_q4
+  - 8_q1
+  - 8_q2
+  - 8_q3
+  - 8_q4
+  - 9_q1
+  - 9_q2
+  - 9_q3
+  - 9_q4
+  - 10_q1
+  - 10_q2
+  - 10_q3
+  - 10_q4
+  - 11_q1
+  - 11_q2
+  - 11_q3
+  - 11_q4
+  - 12_q1
+  - 12_q2
+  - 12_q3
+  - 12_q4
+  - 13_q1
+  - 13_q2
+  - 13_q3
+  - 13_q4
+  - 14_q1
+  - 14_q2
+  - 14_q3
+  - 14_q4
+  - 15_q1
+  - 15_q2
+  - 15_q3
+  - 15_q4
+  - 16_q1
+  - 16_q2
+  - 16_q3
+  - 16_q4
+  - 17_q1
+  - 17_q2
+  - 17_q3
+  - 17_q4
+  - 18_q1
+  - 18_q2
+  - 18_q3
+  - 18_q4
+  - 19_q1
+  - 19_q2
+  - 19_q3
+  - 19_q4
+  - 20_q1
+  - 20_q2
+  - 20_q3
+  - 20_q4
+  - 21_q1
+  - 21_q2
+  - 21_q3
+  - 21_q4
+  - 22_q1
+  - 22_q2
+  - 22_q3
+  - 22_q4
+  - 23_q1
+  - 23_q2
+  - 23_q3
+  - 23_q4
+  - 24_q1
+  - 24_q2
+  - 24_q3
+  - 24_q4
+  - 25_q1
+  - 25_q2
+  - 25_q3
+  - 25_q4
+  - 26_q1
+  - 26_q2
+  - 26_q3
+  - 26_q4
+  - blankspace
+  - sl_punctuation
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - PostProcessing
+  - PostProcessing-mid
+  - PostProcessing-text
+  - PostProcessing-focus
+  - textLayer
+  - textBlur
+  - textUnderline
+  - GeneratedText
+  - Input
+  - Numbers
+  - OnlyNoAnswerInput
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
