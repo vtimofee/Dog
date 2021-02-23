@@ -110,7 +110,6 @@ public class CameraScript : MonoBehaviour
 
         cameraMid.transform.LookAt(cameraTarget.position, Vector3.up);
         spotlight.transform.LookAt(spotlightTarget.position);
-        spotlight.GetComponent<Light>().intensity = Mathf.Lerp(spotlight.GetComponent<Light>().intensity, spotlightTargetIntensity, spotlightIntensitySpeed * Time.deltaTime);
         depthOfFieldBlur.focusDistance.value = Mathf.Lerp(depthOfFieldBlur.focusDistance.value, blurTarget, blurSpeed * Time.deltaTime);
 
        /* if (testRotation)
@@ -123,7 +122,7 @@ public class CameraScript : MonoBehaviour
         }*/
         if (isDialogueStarted)
         {
-            
+            spotlight.GetComponent<Light>().intensity = Mathf.Lerp(spotlight.GetComponent<Light>().intensity, spotlightTargetIntensity, spotlightIntensitySpeed * Time.deltaTime);
             this.transform.RotateAround(cameraTarget.position, Vector3.up, 5 * Time.deltaTime);
             this.transform.LookAt(cameraTarget.position);
             cameraMid.transform.RotateAround(cameraTarget.position, Vector3.down, 1 * Time.deltaTime);
@@ -136,7 +135,8 @@ public class CameraScript : MonoBehaviour
 
         if (returnCamera)
         {
-            cameraMid.transform.position = Vector3.Lerp(cameraMid.transform.position, cameraMidStartingPosition, returnSpeed * Time.deltaTime);
+            spotlight.GetComponent<Light>().intensity = Mathf.Lerp(spotlight.GetComponent<Light>().intensity, spotlightTargetIntensity, spotlightIntensitySpeed * Time.unscaledDeltaTime);
+            cameraMid.transform.position = Vector3.Lerp(cameraMid.transform.position, cameraMidStartingPosition, returnSpeed * Time.unscaledDeltaTime);
             animDoll1.speed = Mathf.Lerp(animDoll1.speed, doll1TargetSpeed, 2f * Time.deltaTime);
             animDoll2.speed = Mathf.Lerp(animDoll2.speed, doll2TargetSpeed, 2f * Time.deltaTime);
         }
@@ -155,7 +155,8 @@ public class CameraScript : MonoBehaviour
             float t = timeElapsed / lerpDuration;
             t = t * t * t * (t * (6f * t - 15f) + 10f);
             object1.position = Vector3.Lerp(objectInitialPosition, objectTargetPosition, t);
-            timeElapsed += Time.deltaTime;
+           if (returnCamera) timeElapsed += Time.unscaledDeltaTime;
+           else timeElapsed += Time.deltaTime;
             yield return null;
         }
         object1.position = objectTargetPosition;

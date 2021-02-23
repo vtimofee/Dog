@@ -101,7 +101,7 @@ public class AlphabetaScript : MonoBehaviour
 	private int scrambleCounter;
 	private bool isScrambleOn;
 	private Vector3[] originalLocalPositions = new Vector3[4];
-	private Color baseTextColor = Color.black;
+	private Color baseTextColor = Color.white;
 	private List<GameObject> grabbedSentence = new List<GameObject>();
 	List<GameObject> sentenceList = new List<GameObject>();
 	List<GameObject> underlineList = new List<GameObject>();
@@ -136,13 +136,15 @@ public class AlphabetaScript : MonoBehaviour
 	string randomString;
 	int charAmount;
 	private bool dueToSpeedUp;
+	public CanvasGroup resetHandCanvasGroup;
+	public Transform resetHand;
 	public Transform clockHand;
 	public Transform questionHand;
 	public Transform clockHandScrambler1;
 	public Transform clockHandScrambler2;
 	public Transform clockHandAbstract;
 	private Transform destinationRotationAbstract;
-	private float bigHandTimer;
+	private float resetHandTimer;
 	public Transform questionDestinationRotation;
 	private Transform destinationRotation;
 	private Transform destinationScrambleRotation1;
@@ -171,8 +173,10 @@ public class AlphabetaScript : MonoBehaviour
 	public Camera clockCameraBlur;
 	private float targetIntensityClock = 0;
 	private int[] abstractArray = new int[26];
-	private float targetIntensityMax = .9f;
+	private float targetIntensityMax = .4f;
 	private float targetIntensityMin = .1f;
+	private float targetIntensityMid = .6f;
+
 	public Material clockMaterial;
 	public Material clockMaterialLines;
 	private Color clockTargetColor = new Color(1, 1, 1, .9f);
@@ -183,12 +187,12 @@ public class AlphabetaScript : MonoBehaviour
 	private float gameTimeScale = 1;
 	private float timescaleTarget = 1;
 	private float timescaleTargetSpeed = 4f;
-	private float timescaleTimerCount = 1;
+	private float timescaleTimerCount = 2;
 	public int questionCounter;
 	private int questionCycleCounter = 1;
 
-	private float finalTimescaleTimerCount = 2;
-
+	private float finalTimescaleTimerCount = 5;
+	private float finalTimeScaleSpeed = 1;
 	private bool isTimescalePaused;
 	private Color cameraBackgroundColor;
 	private Color cameraBackgroundColorOn = new Color(.83f, .83f, .83f, 0);
@@ -243,15 +247,15 @@ public class AlphabetaScript : MonoBehaviour
 	bool isFinalTimeScalePaused;
 
 	// important variables to play with
-	private bool isDebugModeOn = false;
-	private float resetLerpDuration = 2f;
-	private float clockTime = .25f; // .4 is a good one..also 1/3/5
-	private float lerpDuration = .75f; // 1 is a good one
-	private float slowLerpDuration = 1.25f; // 3 is a good one
+	private bool isDebugModeOn = true;
+	private float resetLerpDuration = 1.5f;
+	private float clockTime = .4f; // .4 is a good one..also 1/3/5 is good proportion
+	private float lerpDuration = 1f; // 1 is a good one
+	private float slowLerpDuration = 3f; // 3 is a good one
 	private float scrambleLerpDuration = 3f;
 	private float scrambleLerpDuration2 = 4f;
 	private float punctuationDelay = 2;
-	float pictureLerpSpeed = 2f;
+	float pictureLerpSpeed = 1f;
 	private int letterLimit = 25;  // 25 is max
 	float endOfQuestionDelay = 2;
 	private bool isSwapOn = true;
@@ -270,7 +274,9 @@ public class AlphabetaScript : MonoBehaviour
             Display.displays[i].Activate();
         }
 
-        if (isDebugModeOn)
+		clockBlurTarget = clockBlurOff;
+
+		if (isDebugModeOn)
 		{
 			endOfQuestionDelay = 1;
 			durationOfInput = 1;
@@ -316,47 +322,20 @@ public class AlphabetaScript : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		Debug.Log("questionDestinationRotations : " + questionDestinationRotation.transform.rotation);
-			TurnColorsBlack();
-		//Debug.Log("radialtargetcolor: " + radialTargetColor);
+		ManageColors();
+
 		if (isFinalTimeScalePaused)
 		{
-			Debug.Log("finalTimescaleTimerCount : " + finalTimescaleTimerCount);
 			finalTimescaleTimerCount -= Time.unscaledDeltaTime;
+			Debug.Log("finalTimeScaletimerCount : " + finalTimescaleTimerCount);
 			if (finalTimescaleTimerCount <= 1)
 			{
-				isFinalTimeScalePaused = false;
-				finalTimescaleTimerCount = 10;
 				ResetValues();
-				Time.timeScale = 1;
-				timescaleTarget = 1;
-				Debug.Log("in 5 seconds");
-				Invoke("Restart", 5);
 			}
 
 		}
 
-		//clockHandCycleCounter.eulerAngles = new Vector3(0, 0, 0 * .5f);
-		//clockHandScrambler1.transform.rotation = Quaternion.Lerp(clockHandScrambler1.transform.rotation, destinationRotation.rotation, 5f * Time.deltaTime);
-		//clockHandScrambler2.transform.rotation = Quaternion.Lerp(clockHandScrambler2.transform.rotation, destinationRotation.rotation, 5f * Time.deltaTime);
-		//clockHandAbstract.transform.rotation = Quaternion.Lerp(clockHandAbstract.transform.rotation, destinationRotationAbstract.rotation, 5f * Time.deltaTime);
-		glow.Intensity = Mathf.Lerp(glow.Intensity, targetIntensityClock, 2 * Time.deltaTime);
-		//clockMaterial.color = Color.Lerp(clockMaterial.color, clockTransparentColor, .4f * Time.deltaTime);
-		//clockMaterialLines.color = Color.Lerp(clockMaterialLines.color, clockTransparentColor, .4f * Time.deltaTime);
-		clockFace.transform.localScale = Vector3.Lerp(clockFace.transform.localScale, clockFaceScaleMin, .2f * Time.deltaTime);
-		if (isResetting)
-        {
-			clockHand.transform.rotation = Quaternion.Lerp(clockHand.transform.rotation, destinationRotation.rotation, 2f * Time.unscaledDeltaTime);
-			clockHandScrambler1.transform.rotation = Quaternion.Lerp(clockHandScrambler1.transform.rotation, destinationRotation.rotation, 2f * Time.unscaledDeltaTime);
-			clockHandScrambler2.transform.rotation = Quaternion.Lerp(clockHandScrambler2.transform.rotation, destinationRotation.rotation, 2f * Time.unscaledDeltaTime);
-			questionHand.transform.rotation = Quaternion.Lerp(questionHand.transform.rotation, destinationRotation.rotation, 2f * Time.unscaledDeltaTime);
-
-		}
-
-		if (isPaused)
-        {
-			Time.timeScale = Mathf.Lerp(Time.timeScale, timescaleTarget, 6 * Time.unscaledDeltaTime);
-		}
+	
 
 		if (start)
 		{
@@ -364,7 +343,6 @@ public class AlphabetaScript : MonoBehaviour
             {
 				AbstractLetterEffect();
 				timescaleTimerCount -= Time.unscaledDeltaTime;
-			//	Debug.Log("timescaleCounter : " + timescaleTimerCount + " unscaled : "+ Time.unscaledTime);
 				if(timescaleTimerCount <= 0)
                 {
 					timescaleTarget = 1f;
@@ -374,7 +352,6 @@ public class AlphabetaScript : MonoBehaviour
 					clockBlurTarget = clockBlurOn;
 					targetBlackSpeed = targetBlackSpeedNormal;
 					if (letterReplacementCount <= letterLimit) letterReplacementCount++;
-
 				}
 			}
 
@@ -393,29 +370,46 @@ public class AlphabetaScript : MonoBehaviour
 				else if (radialSelector == 2) FillRadial(inputRadials2);
 				else if (radialSelector == 3) FillRadial(inputRadials3);
 			}
+
 			Time.timeScale = Mathf.Lerp(Time.timeScale, timescaleTarget, timescaleTargetSpeed * Time.deltaTime);
-			bigHandTimer += Time.deltaTime;
 			clockHand.transform.rotation = Quaternion.Lerp(clockHand.transform.rotation, destinationRotation.rotation, 5f * Time.deltaTime);
 			questionHand.transform.rotation = Quaternion.Lerp(questionHand.transform.rotation, questionDestinationRotation.rotation, 1f * Time.deltaTime);
-
-			//clockHandAbstract.transform.rotation = Quaternion.Lerp(clockHandAbstract.transform.rotation, destinationRotationAbstract.rotation, 5f * Time.deltaTime);
 			glow.Intensity = Mathf.Lerp(glow.Intensity, targetIntensityClock, 2 * Time.deltaTime);
-			clockMaterial.color = Color.Lerp(clockMaterial.color, clockTransparentColor, .4f * Time.deltaTime);
-			//clockMaterialLines.color = Color.Lerp(clockMaterialLines.color, clockTransparentColor, .4f * Time.deltaTime);
-			//clockFace.transform.localScale = Vector3.Lerp(clockFace.transform.localScale, clockFaceScaleMin, .2f * Time.deltaTime);
-			//clockCameraBlur.backgroundColor = Color.Lerp(clockCameraBlur.backgroundColor, cameraBackgroundColor, 3 * Time.unscaledDeltaTime);
+			clockMaterial.color = Color.Lerp(clockMaterial.color, clockTransparentColor, .2f * Time.deltaTime);
+			clockCameraBlur.backgroundColor = Color.Lerp(clockCameraBlur.backgroundColor, cameraBackgroundColor, 3 * Time.unscaledDeltaTime);
 			depthOfFieldClockBlur.focalLength.value = Mathf.Lerp(depthOfFieldClockBlur.focalLength.value, clockBlurTarget, 3 * Time.deltaTime);
 			pictureCanvasGroup.alpha = Mathf.Lerp(pictureCanvasGroup.alpha, pictureAlpha, 3 * Time.deltaTime);
-		
-	
+			glow.Intensity = Mathf.Lerp(glow.Intensity, targetIntensityClock, 2 * Time.deltaTime);
+			clockFace.transform.localScale = Vector3.Lerp(clockFace.transform.localScale, clockFaceScaleMin, .2f * Time.deltaTime);
+
 			if (isSwapOn && destinationScrambleRotation2 && destinationScrambleRotation1)
 			{
 				clockHandScrambler1.transform.rotation = Quaternion.Lerp(clockHandScrambler1.transform.rotation, destinationScrambleRotation1.rotation, clockScrambleSpeed * Time.deltaTime);
 				clockHandScrambler2.transform.rotation = Quaternion.Lerp(clockHandScrambler2.transform.rotation, destinationScrambleRotation2.rotation, clockScrambleSpeed * Time.deltaTime);
 			}
 			clockHand.transform.localScale = Vector3.Lerp(clockHand.transform.localScale, clockHandScale, clockHandSizeSpeed * Time.deltaTime);
-			//questionHand.eulerAngles = new Vector3(0, 0, -bigHandTimer * .5f);
-			//underlineCamera.transform.position = Vector3.Lerp(underlineCamera.transform.position, underlineCameraTargetPosition, underlineCameraSpeed * Time.deltaTime);
+		}
+
+		if (isResetting)
+		{
+			
+			clockHand.transform.rotation = Quaternion.Lerp(clockHand.transform.rotation, destinationRotation.rotation, 2f * Time.unscaledDeltaTime);
+			clockHandScrambler1.transform.rotation = Quaternion.Lerp(clockHandScrambler1.transform.rotation, destinationRotation.rotation, 2f * Time.unscaledDeltaTime);
+			clockHandScrambler2.transform.rotation = Quaternion.Lerp(clockHandScrambler2.transform.rotation, destinationRotation.rotation, 2f * Time.unscaledDeltaTime);
+			questionHand.transform.rotation = Quaternion.Lerp(questionHand.transform.rotation, destinationRotation.rotation, 2f * Time.unscaledDeltaTime);
+		}
+
+		if (isPaused)
+		{
+			glow.Intensity = Mathf.Lerp(glow.Intensity, targetIntensityClock, 2 * Time.unscaledDeltaTime);
+			Time.timeScale = Mathf.Lerp(Time.timeScale, timescaleTarget, finalTimeScaleSpeed * Time.unscaledDeltaTime);
+			resetHandCanvasGroup.alpha = Mathf.Lerp(resetHandCanvasGroup.alpha, .9f, 2 * Time.deltaTime);
+			resetHandTimer += Time.unscaledDeltaTime;
+			resetHand.eulerAngles = new Vector3(0, 0, -resetHandTimer * 5f);
+			if (resetHandTimer > 18)
+			{
+				Debug.Log("fully around");
+			}
 		}
 
 		if (Input.GetKeyDown("3"))
@@ -766,7 +760,7 @@ public class AlphabetaScript : MonoBehaviour
 				buttons_q3[i].transform.rotation = Quaternion.Lerp(q3CurrentRotations[i], rotations[0], t);
 				buttons_q4[i].transform.rotation = Quaternion.Lerp(q4CurrentRotations[i], rotations[0], t);
 			}
-			timeElapsed += Time.deltaTime;
+			timeElapsed += Time.unscaledDeltaTime;
 			yield return null;
 		}
 	}
@@ -994,7 +988,7 @@ public class AlphabetaScript : MonoBehaviour
 	{
 		if (isTextGenerated)
 		{
-			Debug.Log("deleting : current sentence counter : " + currentSentenceCounter);
+			//Debug.Log("deleting : current sentence counter : " + currentSentenceCounter);
 			GameObject currentParentSentence;
 
 			if (currentSentenceCounter == 0)
@@ -1019,7 +1013,7 @@ public class AlphabetaScript : MonoBehaviour
 
 	void GenerateNextSentence()
 	{
-		Debug.Log("here! " + "futuresencne counter " +  futureSentenceCounter + "sencenMasterlistcount : " + sentencesMasterList.Count + "isTextGenrated ? : " + isTextGenerated + " sentenceUpperLimit : " + sentenceUpperLimit);
+		//Debug.Log("here! " + "futuresencne counter " +  futureSentenceCounter + "sencenMasterlistcount : " + sentencesMasterList.Count + "isTextGenrated ? : " + isTextGenerated + " sentenceUpperLimit : " + sentenceUpperLimit);
 
 		sentencesList.Clear();
 		UpdateSlaveTextAmountAndColor(); //this is important here
@@ -1032,7 +1026,7 @@ public class AlphabetaScript : MonoBehaviour
 
 		if (!isTextGenerated) //if first pass generate 3 sentences
 		{
-			Debug.Log("made it here");
+			//Debug.Log("made it here");
 			for (int i = 0; i < sentenceUpperLimit; i++)
 			{
 				currentSentence = sentencesMasterList[i];
@@ -1056,7 +1050,7 @@ public class AlphabetaScript : MonoBehaviour
     {
 		ClearRadials();
 		pictureCanvasGroup.alpha = 0;
-		bigHandTimer = 0;
+		resetHandTimer = 0;
 		clockHandScrambler1.eulerAngles = new Vector3(0, 0, 0);
 		clockHandScrambler2.eulerAngles = new Vector3(0, 0, 0);
 		destinationRotationAbstract = clockHandRotations[0];
@@ -1150,7 +1144,7 @@ public class AlphabetaScript : MonoBehaviour
 		//underlineCamera.transform.position = underlineCameraOffPosition;
 
 		//Initialize Clock hands, Assign Clock Rotations
-		bigHandTimer = 0;
+		resetHandTimer = 0;
 		clockHandScrambler1.eulerAngles = new Vector3(0, 0, 0);
 		clockHandScrambler2.eulerAngles = new Vector3(0, 0, 0);
 		string clockHandRotationString = "clock";
@@ -1237,10 +1231,10 @@ public class AlphabetaScript : MonoBehaviour
 
 		slaveLettersIndex = GameObject.FindGameObjectsWithTag("slaveLetter");
 		slaveLettersIndex.OrderBy(i => i.name);
-		Debug.Log("slaveleterindex 1  : " + slaveLettersIndex[0]);
+		//Debug.Log("slaveleterindex 1  : " + slaveLettersIndex[0]);
 
 		slaveLettersList = new List<GameObject>(GameObject.FindGameObjectsWithTag("slaveLetter"));
-		Debug.Log("slaveletterlist : count" + slaveLettersList.Count);
+		//Debug.Log("slaveletterlist : count" + slaveLettersList.Count);
 		slaveButtons_q1 = new List<Button>();
 		slaveButtons_q2 = new List<Button>();
 		slaveButtons_q3 = new List<Button>();
@@ -1280,7 +1274,6 @@ public class AlphabetaScript : MonoBehaviour
 				cursor.transform.position = tempPos;
 				GenerateUnderlines(13, 0, 0, 0, 0);
 				break;
-
 			case 2:
 				break;
 
@@ -1289,8 +1282,6 @@ public class AlphabetaScript : MonoBehaviour
 				underlineWord.transform.position = underlineWordPositions[1];
 				textCameraBlank.transform.localPosition = textCameraPositions[3];
 				textCamera.transform.localPosition = textCameraPositions[3]; // move camera to 3 line position
-                // dueToSpeedUp = true;
-              AbstractLetterTrigger();
                 break;
 
 			case 4:
@@ -1302,29 +1293,21 @@ public class AlphabetaScript : MonoBehaviour
                 textCamera.transform.localPosition = textCameraPositions[0];
 				textCameraBlank.transform.localPosition = textCameraPositions[0];
 				underlineWord.transform.position = underlineWordPositions[0];
-               // dueToSpeedUp = true;
                 radialSelector = 1;
                 break;
 			case 6:
 	
 				textCamera.transform.localPosition = textCameraPositions[4];
 				textCameraBlank.transform.localPosition = textCameraPositions[4];
-
-				//dueToSpeedUp = true;
-				//AbstractLetterTrigger();
 				break;
 
 			case 7:
 				GenerateUnderlines(1, 0, 0, 0, 0);
-				//dueToSpeedUp = true;
 				break;
 
 			case 8:
 				textCamera.transform.localPosition = textCameraPositions[0];
 				textCameraBlank.transform.localPosition = textCameraPositions[0];
-				AbstractLetterTrigger();
-
-				//dueToSpeedUp = true;
 				break;
 
 			case 9:
@@ -1332,15 +1315,12 @@ public class AlphabetaScript : MonoBehaviour
 				textCameraBlank.transform.localPosition = textCameraPositions[3];
 				underlineWord.transform.position = underlineWordPositions[2];
 				underlineWord.GetComponent<RectTransform>().sizeDelta = underlineWidths[1]; //sentence 9
-				//dueToSpeedUp = true;
-				AbstractLetterTrigger();
 				break;
 
 			case 10:
 				radialSelector = 2;
 				GenerateUnderlines(19, 1, 6, 10, 15);
 				underlineWord.transform.position = underlineWordPositions[0];
-				//dueToSpeedUp = true;
 				break;
 
 			case 11:
@@ -1349,17 +1329,14 @@ public class AlphabetaScript : MonoBehaviour
 				textCameraBlank.transform.localPosition = textCameraPositions[1];
 				underlineWord.transform.position = underlineWordPositions[0];
 				startingUnderlinePosition.y -= 527;
-				//dueToSpeedUp = true;
 				break;
 
 			case 12:
 				textCameraBlank.transform.localPosition = textCameraPositions[2];
-				AbstractLetterTrigger();
 				textCamera.transform.localPosition = textCameraPositions[2]; //move camera to 1 line position
 				var tempPos1 = cursor.transform.position;
 				tempPos1.y = -1585;
 				cursor.transform.position = tempPos1;
-				//dueToSpeedUp = true;
 				break;
 
 			case 13:
@@ -1368,7 +1345,6 @@ public class AlphabetaScript : MonoBehaviour
 				GenerateUnderlines(52, 0, 0, 0, 0);
 				radialSelector = 3;
 				radialObject1.transform.position = radialPositions[1];
-				//dueToSpeedUp = true;
 				break;
 
 			case 14:
@@ -1384,7 +1360,6 @@ public class AlphabetaScript : MonoBehaviour
 				underlineWord.transform.position = underlineWordPositions[0];
 				textCameraBlank.transform.localPosition = textCameraPositions[5];
 				textCamera.transform.localPosition = textCameraPositions[5]; // move camera to 3 line position
-				//AbstractLetterTrigger();
 				pictureAlpha = 0f;
 				break;
 
@@ -1414,15 +1389,12 @@ public class AlphabetaScript : MonoBehaviour
 				underlineWord.transform.position = underlineWordPositions[1];
 				GenerateUnderlines(11, 3, 6, 10, 11);
 				underlineWord.GetComponent<RectTransform>().sizeDelta = underlineWidths[0];
-				// dueToSpeedUp = true;
-				AbstractLetterTrigger();
 				break;
 
 			case 19:
 				underlineWord.transform.position = underlineWordPositions[0];
 				textCameraBlank.transform.localPosition = textCameraPositions[0];
 				textCamera.transform.localPosition = textCameraPositions[0];
-				//dueToSpeedUp = true;
 				break;
 			case 20:
 				break;
@@ -1431,8 +1403,6 @@ public class AlphabetaScript : MonoBehaviour
 				textCameraBlank.transform.localPosition = textCameraPositions[2];
 				textCamera.transform.localPosition = textCameraPositions[2];
 				radialObject1.transform.position = radialPositions[1];
-				//dueToSpeedUp = true;
-				AbstractLetterTrigger();
 				pictureAlpha = 0f;
 				break;
 
@@ -1440,14 +1410,12 @@ public class AlphabetaScript : MonoBehaviour
 				var tempPos2 = cursor.transform.position;
 				tempPos2.y = -2605;
 				cursor.transform.position = tempPos2;
-
 				startingUnderlinePosition.y -= 527;
 				GenerateUnderlines(13, 0, 0, 0, 0);
 				radialSelector = 1;
 				pictureAlpha = .7f;
 				textCameraBlank.transform.localPosition = textCameraPositions[0];
 				textCamera.transform.localPosition = textCameraPositions[0];
-				//dueToSpeedUp = true;
 				break;
 
 			case 23:
@@ -1458,6 +1426,12 @@ public class AlphabetaScript : MonoBehaviour
 				startingUnderlinePosition.y += 527;
 				break;
 		}
+		dueToSpeedUp = true;
+		int tempNum = Random.Range(1, 4);
+		if (tempNum == 1 && currentSentenceCounter > 3)
+        {
+			AbstractLetterTrigger();
+        }
 		textCamera.transform.localPosition = textCameraPositions[currentSentenceCounter];
 		textCameraBlank.transform.localPosition = textCameraPositions[currentSentenceCounter];
 
@@ -1551,7 +1525,7 @@ public class AlphabetaScript : MonoBehaviour
 				yield return new WaitForSeconds(delay);
 				Debug.Log("insinde 2 Write Letters" + "isInput" + isInput);
 			}
-			if (sentenceCounter == 22) isPictureScrambling = false;
+			//if (sentenceCounter == 22) isPictureScrambling = false;
 			yield return new WaitForSeconds(durationOfInput);
 
 			StartCoroutine(ReturnLetters(sentenceCounter, true));
@@ -1918,9 +1892,12 @@ public class AlphabetaScript : MonoBehaviour
 		if (swapThreshold < swapFrequency) return;
 
 		else swapThreshold = 0;
-	
-		swapCutter = Random.Range(1, 3);
-		//swapCutter = 1;
+
+		if (swapCutter == 1)
+		{
+			swapCutter = 2;
+		}
+		else swapCutter = 1;
 		letterToSwap1 = letterToSwap2;
 		if (letterToSwap1 == selector || letterToSwap1 == (selector + 1) || letterToSwap1 == (selector + 2) )
         {
@@ -1970,17 +1947,16 @@ public class AlphabetaScript : MonoBehaviour
 	void SpeedUpPacer()
     {
 
-		clockTime /= 1.1f;
-		slowLerpDuration /= 1.1f;
-		lerpDuration /= 1.1f;
-		targetBlackSpeed *= 1.1f;
+		clockTime /= 1.05f;
+		slowLerpDuration /= 1.05f;
+		lerpDuration /= 1.05f;
+		targetBlackSpeed *= 1.5f;
 		CancelInvoke("Pacer");
 		InvokeRepeating("Pacer", 0, clockTime);
 		if (isSwapOn)
 		{
 			CancelInvoke("SwapPacer");
 			InvokeRepeating("SwapPacer", 1, slowLerpDuration);
-
 		}
 			dueToSpeedUp = false;
 
@@ -1993,7 +1969,14 @@ public class AlphabetaScript : MonoBehaviour
 		tempColor.a -= .05f;
 		clockMaterial.color = tempColor;
 		clockMaterialLines.color = tempColor;
-		if (i == 8 || i == 14 || i == 20 || i == 1)
+		if (i == 14 || i == 1)
+        {
+			targetIntensityClock = targetIntensityMax;
+			clockMaterial.color = clockTargetColor;
+			clockMaterialLines.color = clockTargetColor;
+			clockFace.transform.localScale = clockFaceTargetScale;
+		}
+		else if (i == 8 || i == 20)
         {
 			targetIntensityClock = targetIntensityMax;
 			clockMaterial.color = clockTargetColor;
@@ -2558,7 +2541,7 @@ public class AlphabetaScript : MonoBehaviour
 		}
 	}
 
-	void TurnColorsBlack()
+	void ManageColors()
 	{
 		//underlines
 		underlineCanvas.alpha = Mathf.Lerp(underlineCanvas.alpha, underlineAlpha, 3 * Time.deltaTime);
@@ -2584,10 +2567,10 @@ public class AlphabetaScript : MonoBehaviour
 			if (buttons_q1[i])
 			{
 				if (!buttons_q1[i]) break;
-				buttons_q1[i].image.color = Color.Lerp(buttons_q1[i].image.color, targetBlackColor, targetBlackSpeed * Time.deltaTime);
-				buttons_q2[i].image.color = Color.Lerp(buttons_q2[i].image.color, targetBlackColor, targetBlackSpeed * Time.deltaTime);
-				buttons_q3[i].image.color = Color.Lerp(buttons_q3[i].image.color, targetBlackColor, targetBlackSpeed * Time.deltaTime);
-				buttons_q4[i].image.color = Color.Lerp(buttons_q4[i].image.color, targetBlackColor, targetBlackSpeed * Time.deltaTime);
+				buttons_q1[i].image.color = Color.Lerp(buttons_q1[i].image.color, targetBlackColor, targetBlackSpeed * Time.unscaledDeltaTime);
+				buttons_q2[i].image.color = Color.Lerp(buttons_q2[i].image.color, targetBlackColor, targetBlackSpeed * Time.unscaledDeltaTime);
+				buttons_q3[i].image.color = Color.Lerp(buttons_q3[i].image.color, targetBlackColor, targetBlackSpeed * Time.unscaledDeltaTime);
+				buttons_q4[i].image.color = Color.Lerp(buttons_q4[i].image.color, targetBlackColor, targetBlackSpeed * Time.unscaledDeltaTime);
 			}
 		}
 	}
@@ -2624,32 +2607,37 @@ public class AlphabetaScript : MonoBehaviour
 
 	void End()
     {
+		targetIntensityClock = targetIntensityMin;
 		underlineAlpha = 0;
 		cameraScript.isDialogueStarted = false;
 		cameraScript.ReturnCamera();
 		isPaused = true;
-		start = false;
 		isTextGenerated = false;
 		CancelInvoke("Pacer");
 		CancelInvoke("SwapPacer");
 		DeleteGeneratedText();
 		//UpdateSlaveTextAmountAndColor();
-		StartCoroutine(ResetPositionsAndRotations());
 		//destinationRotation = clockHandRotations[0];
 		//textPosition.y = startingSlaveTextPosition.y; // resets the sentences to write on top again
 		//currentSentenceCounter = 0;
-		
 		isFinalTimeScalePaused = true;
-		timescaleTarget = .1f;
+		timescaleTarget = .2f;
 	}
 
     void ResetValues()
     {
-		Debug.Log("hit reset");
+		start = false;
+		isFinalTimeScalePaused = false;
+		finalTimescaleTimerCount = 10;
+		Time.timeScale = 1;
+		timescaleTarget = 1;
+		Debug.Log("in 5 seconds");
 		isResetting = true;
 		destinationRotation = clockHandRotations[0];
 		StartCoroutine(ResetPositionsAndRotations());
 		targetBlackSpeed = targetBlackSpeedPause;
+		StartCoroutine(ResetPositionsAndRotations());
+		Invoke("Restart", 20);
 	}
 
 
@@ -2669,12 +2657,12 @@ public class AlphabetaScript : MonoBehaviour
 
 	void AbstractLetterTrigger()
     {
-		return;
+		
 		Debug.Log("triggered Abstract ");
-		//if (isTimescalePaused) return;
-		//isTimescalePaused = true;
-		//timescaleTarget = 0f;
-		 cameraBackgroundColor = cameraBackgroundColorOff;
+		if (isTimescalePaused) return;
+		isTimescalePaused = true;
+		timescaleTarget = 0f;
+		cameraBackgroundColor = cameraBackgroundColorOff;
 		clockBlurTarget = clockBlurOff;
 		targetBlackSpeed = targetBlackSpeedPause;
 		AbstractLetterEffect();
